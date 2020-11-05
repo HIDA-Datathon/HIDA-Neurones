@@ -34,8 +34,6 @@ class GeneratorResNet(ResNet):
         x = self.layer1(x)
         x = self.last_conv(x)
         x = self.softmax(x)
-        # x = x.argmax(dim=1)
-        # x.requires_grad = True
         return x
 
 
@@ -44,20 +42,20 @@ class MyModel(pl.LightningModule):
     def __init__(self, learning_rate=1e-3, *args, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-
         self.model = GeneratorResNet((800, 600))
 
     def forward(self, x):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        loss_func = nn.CrossEntropyLoss()
+        loss_func = nn.NLLLoss()
         x, y = batch
 
         preds = self(x)
 
-        # y_2d = y.sum(axis=1)
-        loss = dice_score(pred=preds, target=y)
+        y_2d = y.sum(axis=1).long()
+        loss = F.cross_entropy(input=preds, target=y_2d)
+        # loss = loss_func(input=preds, target=y)
         return loss
 
     def configure_optimizers(self):
