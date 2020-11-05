@@ -1,2 +1,6 @@
 data/
+<<<<<<< HEAD
 __pycache__
+=======
+notebooks/models
+>>>>>>> a08c3f5f0a6ee6693b61680561a164d47f2bc539
