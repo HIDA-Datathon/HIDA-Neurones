@@ -9,7 +9,7 @@ import torch
 
 
 class NeutronDataset(Dataset):
-    def __init__(self, data, target, n_classes=17, transform=None):
+    def __init__(self, data, target, n_classes=21, transform=None):
         self.n_classes = n_classes
         self.data = data
         self.target = target
@@ -55,8 +55,8 @@ class NeutronDataLoader(pl.LightningDataModule):
         self.transform = transform
 
     def load_data(self):
-        images = sorted(glob.glob(os.path.join(self.data_dir, self.IMAGE_SUFFIX)))[:20]
-        labels = sorted(glob.glob(os.path.join(self.data_dir, self.LABEL_SUFFIX)))[:20]
+        images = sorted(glob.glob(os.path.join(self.data_dir, self.IMAGE_SUFFIX)))
+        labels = sorted(glob.glob(os.path.join(self.data_dir, self.LABEL_SUFFIX)))
 
         image_array = []
         label_array = []

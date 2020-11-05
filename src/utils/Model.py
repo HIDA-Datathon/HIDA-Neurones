@@ -12,8 +12,8 @@ from pytorch_lightning.metrics.functional.classification import dice_score
 
 class GeneratorResNet(ResNet):
 
-    def __init__(self, image_shape, num_classes=17,*args, **kwargs):
-        super(GeneratorResNet, self).__init__(block=BasicBlock, layers=[1, 0, 0, 0], *args, **kwargs)
+    def __init__(self, image_shape, num_classes=21, *args, **kwargs):
+        super(GeneratorResNet, self).__init__(block=BasicBlock, layers=[3, 0, 0, 0], *args, **kwargs)
         self.image_shape = image_shape
 
         self.inplanes = 64
@@ -33,7 +33,7 @@ class GeneratorResNet(ResNet):
         x = self.relu(x)
         x = self.layer1(x)
         x = self.last_conv(x)
-        x = self.softmax(x)
+        # x = self.softmax(x)
         return x
 
 
