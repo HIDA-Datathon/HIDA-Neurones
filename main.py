@@ -6,9 +6,10 @@ from torchvision.transforms import CenterCrop
 
 def main():
 
-    dm = NeutronDataLoader(batch_size=2, transform=CenterCrop(100))
+    dm = NeutronDataLoader(batch_size=4,
+                           data_dir="/gpfs/home/machnitz/HIDA/HIDA-ufz_image_challenge/photos_annotated")
     model = MyModel()
-    trainer = pl.Trainer(fast_dev_run=True, gpus=1)
+    trainer = pl.Trainer(max_epochs=20, gpus=1)
     trainer.fit(model, dm)
 
 
