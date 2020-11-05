@@ -124,15 +124,17 @@ class DataGenerator(keras.utils.Sequence):
             
             
             if self.augmentation:
-                augmented = self.augmentation(self.image_size)(image=img, mask=mask)
+                augmented = self.augmentation()(image=img, mask=mask)
                 
                 image_augm = augmented['image']
-                mask_augm = augmented['mask'].reshape(*self.image_size, self.nb_labels)
+                mask_augm = augmented['mask']
                 
                 # divide by 255 to normalize images from 0 to 1
                 img = image_augm/255
                 mask = mask_augm
-            
+            else:
+                img = img / 255
+
             X.append(img)
             y.append(mask)
 
