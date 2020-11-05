@@ -12,7 +12,7 @@ class DataGenerator(keras.utils.Sequence):
 
     def __init__(self, datapath='.././data/HIDA-ufz_image_challenge/photos_annotated', 
                        image_size=(224, 224), batch_size=1, shuffle=False, step='train',
-                nb_labels=21, augmentation=None):
+                nb_labels=21, augmentation=None, preprocessing=None):
         """Data generator for validation and training.
         Args:
             image_csv (pd.DataFrame): Dataframe with absolute path to images in
@@ -30,6 +30,7 @@ class DataGenerator(keras.utils.Sequence):
         self.step = step
         self.nb_labels = nb_labels
         self.augmentation=augmentation
+        self.preprocessing = None
         
         if len(self.image_list) != len(self.label_list):
             warnings.warn('Warning, data length is different!')
@@ -128,14 +129,15 @@ class DataGenerator(keras.utils.Sequence):
                 
                 image_augm = augmented['image']
                 mask_augm = augmented['mask']
-                
-                # divide by 255 to normalize images from 0 to 1
-                img = image_augm/255
+
                 mask = mask_augm
-            else:
-                img = img / 255
 
             X.append(img)
             y.append(mask)
+
+        X = np.array(X)
+        
+        if self.preprocessing:
+            X = self.preprocessing(X)
 
         return np.array(X), np.array(y)
