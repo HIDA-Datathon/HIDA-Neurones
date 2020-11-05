@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 import torch
 
 
+
 class NeutronDataset(Dataset):
     def __init__(self, data, target, transform=None):
         self.data = torch.from_numpy(data).float()
@@ -22,7 +23,7 @@ class NeutronDataset(Dataset):
             x = self.transform(x)
             y = self.transform(y)
 
-        return x, y[:1]
+        return x, y
 
     def __len__(self):
         return len(self.data)
@@ -65,7 +66,8 @@ class NeutronDataLoader(pl.LightningDataModule):
             else:
                 print("Error")
 
-        return np.array(image_array), np.array(label_array)
+        image_array = np.moveaxis(np.array(image_array), -1, 1)
+        return image_array, np.array(label_array)
 
     def setup(self, stage=None):
 
