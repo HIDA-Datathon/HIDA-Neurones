@@ -12,7 +12,7 @@ class DataGenerator(keras.utils.Sequence):
 
     def __init__(self, datapath='.././data/HIDA-ufz_image_challenge/photos_annotated', 
                        image_size=(224, 224), batch_size=1, shuffle=False, step='train',
-                nb_labels=20, augmentation=None):
+                nb_labels=21, augmentation=None):
         """Data generator for validation and training.
         Args:
             image_csv (pd.DataFrame): Dataframe with absolute path to images in
@@ -68,13 +68,17 @@ class DataGenerator(keras.utils.Sequence):
             if self._assert_images(img, label):
                 image_array.append(np.array(Image.open(img).resize(self.image_size)))
                 
-                label = np.array(Image.open(label).resize(self.image_size))
-                if len(label.shape) == 2:
-                    label_array.append(label)
-                elif len(label.shape) == 3:
-                    label_array.append(label[:, :, 0])
+                tmp_label = np.array(Image.open(label).resize(self.image_size))
+                if len(tmp_label.shape) == 2:
+                    pass
+                elif len(tmp_label.shape) == 3:
+                    tmp_label = tmp_label[:, :, 0]
                 else:
                     print("Error")
+                    
+                tmp_label= tf.keras.utils.to_categorical(tmp_label, num_classes=self.nb_labels + 1)
+                label = tmp_label[:, :, 1:] # 0 is background - therefore out!
+                label_array.append(label)
     
         return np.array(image_array), np.array(label_array)
         
