@@ -1,7 +1,15 @@
 # Number of loss functions from 
 # https://www.kaggle.com/bigironsphere/loss-function-library-keras-pytorch#Loss-Function-Reference-for-Keras-&-PyTorch
 # For testing with simple UNETs
-import tensorflow.keras.backend as K
+from tensorflow.keras.layers import Conv2D, Activation, BatchNormalization, MaxPooling2D
+from tensorflow.keras.layers import UpSampling2D, Input, Concatenate, Dropout, concatenate
+from tensorflow.keras.models import Model
+from tensorflow.keras.applications import MobileNetV2, mobilenet_v2
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+from tensorflow.keras.metrics import Recall, Precision
+
+from tensorflow.keras import backend as K
+
 import tensorflow as tf
 
 
@@ -86,3 +94,39 @@ def BCE_dice(y_true, y_pred):
     dice = dice_loss(y_true[:, :, :], y_pred[:, :, :])
     dice2 = dice_coef_binary_loss(y_true[:, :, 1:], y_pred[:, :, 1:])
     return  0.33 * dice + 0.33 * cce  + 0.33 * dice2
+
+
+def make_model(image_size, n_classes = 22, MODELPATH=None):
+    inputs = Input(shape=(*image_size, 3), name='input_image')
+   
+    encoder = MobileNetV2(input_tensor=inputs, weights=MODELPATH, include_top=False, alpha=1.0)
+    skip_connection_names = ["input_image", 
+                             "block_1_expand_relu", 
+                             "block_3_expand_relu", 
+                             "block_6_expand_relu"]
+    
+    encoder_output = encoder.get_layer("block_13_expand_relu").output
+    
+    f = [32, 64, 128, 256]
+    x = encoder_output
+    
+    for i in range(1, len(skip_connection_names)+1, 1):
+        x_skip = encoder.get_layer(skip_connection_names[-i]).output
+        x = UpSampling2D((2, 2))(x)
+        x = Concatenate()([x, x_skip])
+        
+        x = Conv2D(f[-i], (3, 3), padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        
+        x = Conv2D(f[-i], (3, 3), padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+
+   # x = tf.keras.layers.Dropout(0.25)(x)
+        
+    x = Conv2D(n_classes, (1, 1), padding="same")(x)
+    x = tf.keras.layers.Softmax(axis=-1)(x)
+    
+    model = Model(inputs, x)
+    return model
