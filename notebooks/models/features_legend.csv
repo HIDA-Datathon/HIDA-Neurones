@@ -1,0 +1,22 @@
+id_rgb, id_polygon, label
+     1,    1361294, building
+     2,    1361622, housenumber
+     3,    1361612, blackstripe
+     4,    1361613, paved
+     5,    1361620, person
+     6,    1361621, licence
+     7,    1344856, Multi-laneroad
+     8,    1344863, Forest
+     9,    1344905, dirtroad
+    10,    1344908, lawn
+    11,    1344906, field
+    12,    1344910, background
+    13,    1346682, federalhigway
+    14,    1348874, car
+    15,    1349359, Tree
+    16,    1349374, Bush
+    17,    1350282, cornfield
+    18,    2695873, gravel
+    19,    2593587, Railwaytracks
+    20,    2698407, Water
+
