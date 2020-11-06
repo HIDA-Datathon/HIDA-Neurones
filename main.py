@@ -17,7 +17,7 @@ def main(args=None):
     parser = ArgumentParser()
     dm_cls = NeutronDataLoader
 
-    checkpoint_callback = ModelCheckpoint(monitor="Valid Loss", save_top_k=5, mode='min', save_last=True)
+    checkpoint_callback = ModelCheckpoint(monitor="Valid Loss", save_last=True, save_top_k=3, mode='min')
 
     script_args, _ = parser.parse_known_args(args)
     parser = dm_cls.add_argparse_args(parser)
@@ -29,7 +29,6 @@ def main(args=None):
                                           project_name="HIDA", offline=True)
     dm = dm_cls.from_argparse_args(args)
     model = MyModel(**vars(args))
-
     trainer = pl.Trainer.from_argparse_args(args, logger=comet_logger, checkpoint_callback=checkpoint_callback)
     trainer.fit(model, dm)
 
