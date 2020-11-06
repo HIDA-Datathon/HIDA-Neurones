@@ -6,6 +6,7 @@ import os
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, Dataset
 import torch
+import random
 
 
 class NeutronDataset(Dataset):
@@ -57,6 +58,11 @@ class NeutronDataLoader(pl.LightningDataModule):
     def load_data(self):
         images = sorted(glob.glob(os.path.join(self.data_dir, self.IMAGE_SUFFIX)))
         labels = sorted(glob.glob(os.path.join(self.data_dir, self.LABEL_SUFFIX)))
+
+        #shuffle the images and labels in equal order
+        temp = list(zip(images, labels)) 
+        random.shuffle(temp) 
+        images, labels = zip(*temp)
 
         image_array = []
         label_array = []
