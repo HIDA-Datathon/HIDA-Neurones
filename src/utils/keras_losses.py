@@ -83,6 +83,6 @@ def dice_coef_binary_loss(y_true, y_pred):
 # Add binary cross entropy
 def BCE_dice(y_true, y_pred):
     cce = K.categorical_crossentropy(y_true[:, :, :], y_pred[:, :, :])
-    dice = Loss.dice_loss(y_true[:, :, :], y_pred[:, :, :])
+    dice = dice_loss(y_true[:, :, :], y_pred[:, :, :])
     dice2 = dice_coef_binary_loss(y_true[:, :, 1:], y_pred[:, :, 1:])
     return  0.33 * dice + 0.33 * cce  + 0.33 * dice2
