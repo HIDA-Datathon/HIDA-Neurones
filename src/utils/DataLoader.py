@@ -1,6 +1,5 @@
 import glob
 from PIL import Image
-import json
 import numpy as np
 import os
 import pytorch_lightning as pl

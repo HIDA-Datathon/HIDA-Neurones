@@ -4,9 +4,10 @@ import pytorch_lightning as pl
 from torchvision.transforms import CenterCrop
 from pytorch_lightning import loggers as pl_loggers
 from argparse import ArgumentParser
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 
-EXPERIMENT_NAME = "SegResnet-3"
+EXPERIMENT_NAME = "SegResnet-20"
 
 
 def main(args=None):
@@ -15,6 +16,8 @@ def main(args=None):
 
     parser = ArgumentParser()
     dm_cls = NeutronDataLoader
+
+    checkpoint_callback = ModelCheckpoint(monitor="Valid Loss", save_top_k=10, mode='min')
 
     script_args, _ = parser.parse_known_args(args)
     parser = dm_cls.add_argparse_args(parser)
@@ -26,7 +29,7 @@ def main(args=None):
                                           project_name="HIDA", offline=True)
     dm = dm_cls.from_argparse_args(args)
     model = MyModel(**vars(args))
-    trainer = pl.Trainer.from_argparse_args(args, logger=comet_logger)
+    trainer = pl.Trainer.from_argparse_args(args, logger=comet_logger, checkpoint_callback=checkpoint_callback)
     trainer.fit(model, dm)
 
 

@@ -19,6 +19,9 @@ class MyModel(pl.LightningModule):
         self.save_hyperparameters()
         self.model = fcn_resnet50(pretrained=True, num_classes=21)
 
+    def setup(self, *args, **kwargs):
+        self.logger.experiment.log_parameters(self.hparams)
+
     def forward(self, x):
         return self.model(x)["out"]
 
@@ -89,6 +92,13 @@ class MyModel(pl.LightningModule):
         #     self.logger.experiment.log_confusion_matrix(matrix=cm, file_name=f"confusion_matrix_{self.current_epoch}.json")
 
         plt.close("all")
+
+    def on_train_end(self) -> None:
+        folder = self.trainer.checkpoint_callback.dirpath
+
+        # include save model weights and onnx model in comet-ml log:
+        if self.trainer.checkpoint_callback:
+            self.logger.experiment.log_model("BestModel", folder, overwrite=True)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
