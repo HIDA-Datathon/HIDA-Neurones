@@ -27,7 +27,8 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    image_path = "C:/Users/Tobias/Downloads/HIDA-ufz_image_challenge/photos_annotated/2019_0626_080354_004.jpg.jpg"
+    image_path = "/home/robert/Neutrons_Net/data/HIDA-ufz_image_challenge/photos_annotated/2019_0626_080455_007.jpg.jpg"
+    
     file_index = image_path.index("/photos_annotated")
     file_end_index = image_path.index(".jpg")
     file_name = image_path[file_index:file_end_index]
@@ -40,10 +41,12 @@ if __name__ == "__main__":
     output = model(input_tensor).argmax(dim=1).detach().cpu().numpy()
     
     #copy to all channels
-    for i in range(3):
-        output[i]=output[0]
-
+    output_3d = np.zeros((3,600,800))
+    print(output_3d.shape)
+    for i in range(2):
+        output_3d[i]=output[0]
+    output_3d=np.moveaxis(output_3d, 0, -1)
     # save image as png
-    save_path="data/HIDA-ufz_image_challenge/photos_predictions"
-    im = Image.fromarray(output)
+    save_path="data/predictions"
+    im = Image.fromarray(output_3d)
     im.save(os.path.join(save_path, file_name + "_pred.jpg.png"))
