@@ -1,0 +1,7 @@
+voila
+jupyter
+ipywidgets
+tensorflow <2.0
+pillow
+matplotlib
+packaging
