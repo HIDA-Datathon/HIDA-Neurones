@@ -29,7 +29,8 @@ def main(args=None):
 
 if __name__ == "__main__":
     IMAGE_SUFFIX = "*.jpg"
-    data_dir="/home/robert/Neutrons_Net/data/HIDA-ufz_image_challenge/photos_annotated/"
+    
+    data_dir="data/HIDA-ufz_image_challenge/photos_annotated/"
     images = glob.glob(data_dir + "*.jpg")
     
     for path in images:
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         for i in range(2):
             output_3d[i]=output[0]
         output_3d=np.moveaxis(output_3d, 0, -1)
-        # save image as png
-        save_path="/home/robert/Neutrons_Net/data/predictions"
+        
+        save_path="data/predictions"
         im = Image.fromarray(np.uint8(output_3d))
         im.save(os.path.join(save_path, file_name + "_pred.jpg.png"))

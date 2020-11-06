@@ -140,3 +140,6 @@ dmypy.json
 cython_debug/
 
 .comet.config
+
+data/HIDA-ufz_image_challenge/
+data/predictions/
