@@ -29,7 +29,7 @@ def main(args=None):
 
 if __name__ == "__main__":
     IMAGE_SUFFIX = "*.jpg"
-    
+
     data_dir="data/HIDA-ufz_image_challenge/photos_annotated/"
     images = glob.glob(data_dir + "*.jpg")
     
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         #copy to all channels
         output_3d = np.zeros((3,600,800))
         print(output_3d.shape)
-        for i in range(2):
+        for i in range(3):
             output_3d[i]=output[0]
         output_3d=np.moveaxis(output_3d, 0, -1)
         
