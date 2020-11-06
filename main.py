@@ -6,7 +6,7 @@ from pytorch_lightning import loggers as pl_loggers
 from argparse import ArgumentParser
 
 
-EXPERIMENT_NAME = "Training"
+EXPERIMENT_NAME = "SegResnet-3"
 
 
 def main(args=None):
@@ -24,9 +24,7 @@ def main(args=None):
 
     comet_logger = pl_loggers.CometLogger(save_dir="comet_logs", experiment_name=EXPERIMENT_NAME,
                                           project_name="HIDA", offline=True)
-    dm = dm_cls.from_argparse_args(args,
-                           data_dir="/gpfs/home/machnitz/HIDA/HIDA-ufz_image_challenge/photos_annotated"
-                           )
+    dm = dm_cls.from_argparse_args(args)
     model = MyModel(**vars(args))
     trainer = pl.Trainer.from_argparse_args(args, logger=comet_logger)
     trainer.fit(model, dm)

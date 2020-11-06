@@ -1,4 +1,3 @@
-import torch.nn as nn
 import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
@@ -7,38 +6,10 @@ import matplotlib.pyplot as plt
 
 import os, sys
 sys.path.append(os.path.abspath(".."))
-from src.utils.DataLoader import NeutronDataLoader
-from torchvision.models.resnet import ResNet, BasicBlock
 from pytorch_lightning.metrics.functional.classification import dice_score
 import numpy as np
 from argparse import ArgumentParser
-
-
-class GeneratorResNet(ResNet):
-
-    def __init__(self, image_shape, num_classes=21, *args, **kwargs):
-        super(GeneratorResNet, self).__init__(block=BasicBlock, layers=[3, 0, 0, 0], *args, **kwargs)
-        self.image_shape = image_shape
-
-        self.inplanes = 64
-
-        # layers to extend ResNet:
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=1, padding=3, bias=False)
-        self.last_conv = nn.Conv2d(64, num_classes, kernel_size=1, stride=1, padding=0, bias=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2, padding=1)
-        self.sigmoid = nn.Sigmoid()
-        self.softmax = nn.Softmax2d()
-
-        del self.fc, self.avgpool
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
-        x = self.layer1(x)
-        x = self.last_conv(x)
-        # x = self.softmax(x)
-        return x
+from torchvision.models.segmentation import fcn_resnet50
 
 
 class MyModel(pl.LightningModule):
@@ -46,10 +17,10 @@ class MyModel(pl.LightningModule):
     def __init__(self, learning_rate=1e-3, *args, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.model = GeneratorResNet((800, 600))
+        self.model = fcn_resnet50(pretrained=True, num_classes=21)
 
     def forward(self, x):
-        return self.model(x)
+        return self.model(x)["out"]
 
     def training_step(self, batch, batch_idx):
         stage = "Training"
@@ -62,7 +33,7 @@ class MyModel(pl.LightningModule):
         self.log("Train Loss", loss, on_step=True)
 
         # if True:
-        #     self._log_step_figures(x, y_2d, preds)
+        #     self._log_step_figures(x, y_2d, preds, batch_idx)
 
         return loss
 
@@ -80,7 +51,7 @@ class MyModel(pl.LightningModule):
         self.logger.experiment.log_metric(f"Dice score {stage}", score, step=self.global_step)
 
         if True:
-            self._log_step_figures(x, y_2d, preds)
+            self._log_step_figures(x, y_2d, preds, batch_idx)
 
         return loss
 
@@ -89,7 +60,7 @@ class MyModel(pl.LightningModule):
         opt = torch.optim.Adam(self.model.parameters(), lr=lr)
         return opt
 
-    def _log_step_figures(self, x, y, y_hat):
+    def _log_step_figures(self, x, y, y_hat, batch_idx):
 
         fig, ax = plt.subplots()
         im = ax.imshow(y[0, ].detach().cpu().numpy(), cmap="inferno")
@@ -110,6 +81,12 @@ class MyModel(pl.LightningModule):
         im3 = ax.imshow(np.moveaxis(x[0, ].detach().cpu().numpy(), 0, -1), cmap="inferno")
         self.logger.experiment.log_figure(figure=fig3, figure_name=f"Image",
                                           step=self.global_step)
+
+        # cm = pl.metrics.functional.classification.confusion_matrix(y_hat.argmax(dim=1), y, normalize=False,
+        #                                                                      num_classes=21)
+
+        # if batch_idx == 0:
+        #     self.logger.experiment.log_confusion_matrix(matrix=cm, file_name=f"confusion_matrix_{self.current_epoch}.json")
 
         plt.close("all")
 
