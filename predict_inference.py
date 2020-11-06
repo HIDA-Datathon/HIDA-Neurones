@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 import os
+import glob
 
 def get_args(parent_parser):
     parser = ArgumentParser(parents=[parent_parser], add_help=False)
@@ -27,26 +28,29 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    image_path = "/home/robert/Neutrons_Net/data/HIDA-ufz_image_challenge/photos_annotated/2019_0626_080455_007.jpg.jpg"
+    IMAGE_SUFFIX = "*.jpg"
+    data_dir="/home/robert/Neutrons_Net/data/HIDA-ufz_image_challenge/photos_annotated/"
+    images = glob.glob(data_dir + "*.jpg")
     
-    file_index = image_path.index("/photos_annotated")
-    file_end_index = image_path.index(".jpg")
-    file_name = image_path[file_index:file_end_index]
-    model = main()
-    image = np.array(Image.open(image_path)) / 255
-    image = np.moveaxis(image, -1, 0)
-    image = np.expand_dims(image, 0)
-    input_tensor = torch.from_numpy(image).float()
+    for path in images:
+        file_index = path.index("photos_annotated")
+        file_end_index = path.index(".jpg")
+        file_name = path[file_index:file_end_index]
+        model = main()
+        image = np.array(Image.open(path)) / 255
+        image = np.moveaxis(image, -1, 0)
+        image = np.expand_dims(image, 0)
+        input_tensor = torch.from_numpy(image).float()
 
-    output = model(input_tensor).argmax(dim=1).detach().cpu().numpy()
+        output = model(input_tensor).argmax(dim=1).detach().cpu().numpy()
     
-    #copy to all channels
-    output_3d = np.zeros((3,600,800))
-    print(output_3d.shape)
-    for i in range(2):
-        output_3d[i]=output[0]
-    output_3d=np.moveaxis(output_3d, 0, -1)
-    # save image as png
-    save_path="data/predictions"
-    im = Image.fromarray(output_3d)
-    im.save(os.path.join(save_path, file_name + "_pred.jpg.png"))
+        #copy to all channels
+        output_3d = np.zeros((3,600,800))
+        print(output_3d.shape)
+        for i in range(2):
+            output_3d[i]=output[0]
+        output_3d=np.moveaxis(output_3d, 0, -1)
+        # save image as png
+        save_path="/home/robert/Neutrons_Net/data/predictions"
+        im = Image.fromarray(np.uint8(output_3d))
+        im.save(os.path.join(save_path, file_name + "_pred.jpg.png"))
