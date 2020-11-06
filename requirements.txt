@@ -5,3 +5,4 @@ tensorflow <2.0
 pillow
 matplotlib
 packaging
+h5py==2.10.0
