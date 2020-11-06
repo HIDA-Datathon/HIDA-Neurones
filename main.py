@@ -17,7 +17,7 @@ def main(args=None):
     parser = ArgumentParser()
     dm_cls = NeutronDataLoader
 
-    checkpoint_callback = ModelCheckpoint(monitor="Valid Loss", save_last=True, save_top_k=10, mode='min')
+    checkpoint_callback = ModelCheckpoint(monitor="Valid Loss", save_last=True, save_top_k=3, mode='min')
 
     script_args, _ = parser.parse_known_args(args)
     parser = dm_cls.add_argparse_args(parser)
