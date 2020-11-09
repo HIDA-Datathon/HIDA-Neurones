@@ -1,18 +1,23 @@
 import glob
 from PIL import Image
-import json
 import numpy as np
 import os
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, Dataset
 import torch
+import random
 
 
 class NeutronDataset(Dataset):
-    def __init__(self, data, target, transform=None):
-        self.data = torch.from_numpy(data).float()
-        self.target = torch.from_numpy(target).float()
+    def __init__(self, data, target, n_classes=21, transform=None):
+        self.n_classes = n_classes
+        self.data = data
+        self.target = target
         self.transform = transform
+
+    def get_one_hot(self, targets, nb_classes):
+        res = np.eye(nb_classes)[np.array(targets).reshape(-1)]
+        return res.reshape(list(targets.shape) + [nb_classes])
 
     def __getitem__(self, index):
         x = self.data[index]
@@ -22,7 +27,8 @@ class NeutronDataset(Dataset):
             x = self.transform(x)
             y = self.transform(y)
 
-        return x, y[:1]
+        y = np.moveaxis(self.get_one_hot(y.astype(int), self.n_classes), -1, 0)
+        return torch.from_numpy(x).float(), torch.from_numpy(y).float()
 
     def __len__(self):
         return len(self.data)
@@ -30,8 +36,8 @@ class NeutronDataset(Dataset):
 
 class NeutronDataLoader(pl.LightningDataModule):
     def __init__(self, data_dir: str = "C:/Users/Tobias/Downloads/HIDA-ufz_image_challenge/photos_annotated",
-                 batch_size: int = 64,
-                 num_workers: int = 8, transform=None):
+                 batch_size: int = 8,
+                 num_workers: int = 1, transform=None):
         super().__init__()
 
         self.LABEL_SUFFIX = "*.png"
@@ -52,6 +58,11 @@ class NeutronDataLoader(pl.LightningDataModule):
         images = sorted(glob.glob(os.path.join(self.data_dir, self.IMAGE_SUFFIX)))
         labels = sorted(glob.glob(os.path.join(self.data_dir, self.LABEL_SUFFIX)))
 
+        #shuffle the images and labels in equal order
+        temp = list(zip(images, labels)) 
+        random.shuffle(temp) 
+        images, labels = zip(*temp)
+
         image_array = []
         label_array = []
 
@@ -65,7 +76,8 @@ class NeutronDataLoader(pl.LightningDataModule):
             else:
                 print("Error")
 
-        return np.array(image_array), np.array(label_array)
+        image_array = np.moveaxis(np.array(image_array), -1, 1)
+        return image_array / 255, np.array(label_array)
 
     def setup(self, stage=None):
 
